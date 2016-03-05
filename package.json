@@ -1,0 +1,22 @@
+{
+  "name": "connectr-mobile",
+  "version": "1.0.0",
+  "description": "",
+  "main": "spredfast-info/app.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j0hnnys/ConnectrMobile.git"
+  },
+  "author": "Johnny N",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/j0hnnys/ConnectrMobile/issues"
+  },
+  "homepage": "https://github.com/j0hnnys/ConnectrMobile#readme",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}
