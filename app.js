@@ -1,7 +1,7 @@
 var http = require('http');
 var https = require('https');
 var fs = require('fs');
-var wstream = fs.createWriteStream('spredfast-info/output.json');
+var wstream = fs.createWriteStream('output.json');
 var content;
 var jsonResult;
 var topic = 'NBCUniversal';
@@ -10,7 +10,7 @@ https.get('https://search-proxy.spredfast.com/search.json?q=' + topic + '&filter
     res.pipe(wstream);
 
     wstream.on('finish', function() {
-      fs.readFile('spredfast-info/output.json', 'utf8', function (err, data) {
+      fs.readFile('output.json', 'utf8', function (err, data) {
         if (err) throw err;
         var obj = JSON.parse(data);
         console.log('got', obj.views.entities.data.length, 'tweets about', topic, "in the past hour.");

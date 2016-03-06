@@ -2,20 +2,20 @@
   "name": "connectr-mobile",
   "version": "1.0.0",
   "description": "",
-  "main": "spredfast-info/app.js",
+  "main": "app.js",
   "scripts": {
     "test": "mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/j0hnnys/ConnectrMobile.git"
+    "url": "git+https://github.com/robeau/ConnectrNode.git"
   },
-  "author": "Johnny N",
+  "author": "Natalie Romano",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/j0hnnys/ConnectrMobile/issues"
+    "url": "https://github.com/robeau/ConnectrNode/issues"
   },
-  "homepage": "https://github.com/j0hnnys/ConnectrMobile#readme",
+  "homepage": "https://github.com/robeau/ConnectrNode#readme",
   "dependencies": {
     "express": "^4.13.4"
   }
