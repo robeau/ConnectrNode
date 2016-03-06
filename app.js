@@ -6,7 +6,7 @@ var wstreamImg = fs.createWriteStream('outputImg.json');
 var wstreamVid = fs.createWriteStream('outputVid.json');
 var content;
 var jsonResult;
-var topic = 'hackathon';
+var topic = 'trump';
 
 function getTopFiveTweets() {
   https.get('https://search-proxy.spredfast.com/search.json?q=' + topic + '&filter.start=-1h&filter.finish=0&view.entities.limit=20', function (res) {
@@ -56,21 +56,21 @@ function getTopImage() {
 }
 
 function getTopVideo() {
-  https.get('https://search-proxy.spredfast.com/search.json?q=' + topic + '&filter.start=-1d&filter.finish=0&view.entities.limit=20&filter.has_video=true', function (res) {
+  https.get('https://search-proxy.spredfast.com/search.json?q=' + topic + '&filter.start=-1d&filter.finish=0&view.entities.limit=20&filter.has_video=true&filter.entity_type=original', function (res) {
       res.pipe(wstreamVid);
 
       wstreamVid.on('finish', function() {
         fs.readFile('outputVid.json', 'utf8', function (err, data) {
           if (err) throw err;
           var obj = JSON.parse(data);
-          var myVideo = getTop(obj.views.entities.data)[0];
+          var myVideo = getTop(obj.views.entities.data, true)[0];
           var entry = {
             topic: topic,
             retweets: myVideo.raw.retweet_count,
             user: myVideo.raw.user.screen_name,
             url: myVideo.raw.entities.urls[0].expanded_url
           }
-          console.log('The top video related to ' + topic + ' from the past 24 hours got ' + entry.retweets + ' retweets, and was posted by' + entry.user);
+          console.log('The top youtube video related to ' + topic + ' from the past 24 hours got ' + entry.retweets + ' retweets, and was posted by' + entry.user);
           console.log('Video url:', entry.url);
         });
       });
@@ -80,12 +80,12 @@ function getTopVideo() {
 function parseTweetText(str) {
   var arr = str.split(' ');
 
-  if(arr.indexOf('RT') >= 0) {
+  while(arr.indexOf('RT') >= 0) {
     arr.splice(arr.indexOf('RT'),1, 'retweeted');
   }
   if(arr[0] !== 'retweeted') arr.unshift('tweeted');
 
-  for(var i = 0; i < arr.length; i++) {
+  for(var i = arr.length - 1; i >= 0; i--) {
     if(arr[i].indexOf('http') >= 0) {
       arr.splice(i,1);
     }
@@ -94,15 +94,14 @@ function parseTweetText(str) {
   return arr.join(' ');
 }
 
-function getTop(tweets) {
+function getTop(tweets, isVid) {
   var arr = [],
       rtCache = {};
 
-
-  tweets.forEach(function(tweet) {
+  tweets.forEach(function(tweet, isVid) {
     if(!tweet.raw.retweeted_status || !rtCache[tweet.raw.retweeted_status.id]){
-      if(!rtCache[tweet.id]) {
-        if(arr.length < 5) {
+      if(!rtCache[tweet.id] && (!isVid || (tweet.raw.entities.urls[0] && tweet.raw.entities.urls[0].expanded_url.substr('you') >= 0))) {
+        if(arr.length < 10) {
           arr.push(tweet);
           if(tweet.raw.retweeted_status) rtCache[tweet.raw.retweeted_status.id] = 1;
           else rtCache[tweet.id] = 1;
@@ -124,5 +123,5 @@ function getTop(tweets) {
 }
 
 getTopFiveTweets();
+getTopImage()
 getTopVideo();
-getTopImage();
