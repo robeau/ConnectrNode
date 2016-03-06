@@ -8,3 +8,5 @@
 /captures
 /node_modules
 output.json
+outputImg.json
+outputVid.json
