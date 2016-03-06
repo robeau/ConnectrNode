@@ -1,4 +1,6 @@
-# Connectr
+# ConnectrNoder
+
+Nodejs code for the Connectr Alexa Skill
 ---
 ## Spredfast data
 
@@ -10,5 +12,3 @@ npm install
 node spredfast-info/app.js
 ```
 The results will be streamed to spredfast-info/output.json
-
----
