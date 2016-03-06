@@ -6,7 +6,7 @@ var wstreamImg = fs.createWriteStream('outputImg.json');
 var wstreamVid = fs.createWriteStream('outputVid.json');
 var content;
 var jsonResult;
-var topic = 'NBCUniversal';
+var topic = 'hackathon';
 
 function getTopFiveTweets() {
   https.get('https://search-proxy.spredfast.com/search.json?q=' + topic + '&filter.start=-1h&filter.finish=0&view.entities.limit=20', function (res) {
@@ -18,8 +18,15 @@ function getTopFiveTweets() {
           var obj = JSON.parse(data);
           console.log('got', obj.views.entities.data.length, 'tweets about', topic, "in the past hour.");
           var myFive = getTop(obj.views.entities.data);
-          myFive.forEach(function(tweet,i) {
-            console.log('Tweet',i,tweet.raw.text, tweet.raw.retweet_count);
+          var entryArr = [];
+          myFive.forEach(function(tweet) {
+            entryArr.push({
+                topic: topic,
+                retweets: tweet.raw.retweet_count,
+                user: tweet.raw.user.screen_name,
+                text: parseTweetText(tweet.raw.text)
+              });
+            console.log( tweet.raw.user.screen_name, parseTweetText(tweet.raw.text), tweet.raw.retweet_count);
           });
         });
       });
@@ -35,8 +42,14 @@ function getTopImage() {
           if (err) throw err;
           var obj = JSON.parse(data);
           var myImage = getTop(obj.views.entities.data)[0];
-          console.log('The top image related to ' + topic + ' from the past 24 hours got ' + myImage.raw.retweet_count + ' retweets, and was posted by' + myImage.raw.user.screen_name);
-          console.log('Image url:', myImage.raw.entities.media[0].media_url);
+          var entry = {
+            topic: topic,
+            retweets: myImage.raw.retweet_count,
+            user: myImage.raw.user.screen_name,
+            url: myImage.raw.entities.media[0].media_url
+          }
+          console.log('The top image related to ' + topic + ' from the past 24 hours got ' + entry.retweets + ' retweets, and was posted by' + entry.user);
+          console.log('Image url:', entry.url);
         });
       });
   });
@@ -51,31 +64,65 @@ function getTopVideo() {
           if (err) throw err;
           var obj = JSON.parse(data);
           var myVideo = getTop(obj.views.entities.data)[0];
-          console.log('The top video related to ' + topic + ' from the past 24 hours got ' + myVideo.raw.retweet_count + ' retweets, and was posted by' + myVideo.raw.user.screen_name);
-          console.log('Video url:', myVideo.raw.entities.urls[0].expanded_url);
+          var entry = {
+            topic: topic,
+            retweets: myVideo.raw.retweet_count,
+            user: myVideo.raw.user.screen_name,
+            url: myVideo.raw.entities.urls[0].expanded_url
+          }
+          console.log('The top video related to ' + topic + ' from the past 24 hours got ' + entry.retweets + ' retweets, and was posted by' + entry.user);
+          console.log('Video url:', entry.url);
         });
       });
   });
 }
 
+function parseTweetText(str) {
+  var arr = str.split(' ');
+
+  if(arr.indexOf('RT') >= 0) {
+    arr.splice(arr.indexOf('RT'),1, 'retweeted');
+  }
+  if(arr[0] !== 'retweeted') arr.unshift('tweeted');
+
+  for(var i = 0; i < arr.length; i++) {
+    if(arr[i].indexOf('http') >= 0) {
+      arr.splice(i,1);
+    }
+  }
+
+  return arr.join(' ');
+}
+
 function getTop(tweets) {
-  var arr = [];
+  var arr = [],
+      rtCache = {};
+
 
   tweets.forEach(function(tweet) {
-    if(arr.length < 5) {
-      arr.push(tweet);
+    if(!tweet.raw.retweeted_status || !rtCache[tweet.raw.retweeted_status.id]){
+      if(!rtCache[tweet.id]) {
+        if(arr.length < 5) {
+          arr.push(tweet);
+          if(tweet.raw.retweeted_status) rtCache[tweet.raw.retweeted_status.id] = 1;
+          else rtCache[tweet.id] = 1;
+        }
+        else if(tweet.raw.retweet_count < arr[4].raw.retweet_count) {
+          arr.splice(4,1);
+          arr.push(tweet);
+          if(tweet.raw.retweeted_status) rtCache[tweet.raw.retweeted_status.id] = 1;
+          else rtCache[tweet.id] = 1;
+        }
+
+        arr.sort(function(a,b) {
+          return +b.raw.retweet_count - +a.raw.retweet_count;
+        });
+      }
     }
-    else if(tweet.raw.retweet_count < arr[4].raw.retweet_count) {
-      arr.splice(4,1);
-      arr.push(tweet);
-    }
-    arr.sort(function(a,b) {
-      return +b.raw.retweet_count - +a.raw.retweet_count;
-    });
   });
   return arr;
 }
 
 getTopFiveTweets();
-getTopImage();
 getTopVideo();
+getTopImage();
