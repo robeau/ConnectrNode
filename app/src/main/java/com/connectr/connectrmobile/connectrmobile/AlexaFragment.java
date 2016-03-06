@@ -7,10 +7,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.firebase.client.Firebase;
+
 /**
  * Created by Johnny on 3/5/16.
  */
 public class AlexaFragment extends Fragment {
+
+    private Firebase mFirebaseRef;
 
     public static AlexaFragment newInstance() {
         return new AlexaFragment();
@@ -21,7 +25,8 @@ public class AlexaFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_alexa, container, false);
 
-
+        Firebase.setAndroidContext(getActivity());
+        mFirebaseRef = new Firebase("https://dazzling-inferno-6316.firebaseio.com/");
 
         return v;
     }

@@ -9,6 +9,6 @@ public class TwitterTweetsActivity extends SingleFragmentActivity {
 
     @Override
     public Fragment createFragment() {
-        return TwitterTweetsFragment.newInstance()
+        return null;
     }
 }
